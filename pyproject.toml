@@ -39,9 +39,9 @@ classifiers = [
 ralph-runner = "ralph_runner.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/root/ralph-runner"
-Repository = "https://github.com/root/ralph-runner"
-Issues = "https://github.com/root/ralph-runner/issues"
+Homepage = "https://github.com/gzxultra/ralph-runner"
+Repository = "https://github.com/gzxultra/ralph-runner"
+Issues = "https://github.com/gzxultra/ralph-runner/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ralph_runner"]

@@ -53,7 +53,7 @@ pip install ralph-runner
 Or install from source:
 
 ```bash
-git clone https://github.com/root/ralph-runner.git
+git clone https://github.com/gzxultra/ralph-runner.git
 cd ralph-runner
 pip install -e .
 ```
