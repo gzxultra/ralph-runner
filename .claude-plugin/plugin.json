@@ -1,0 +1,11 @@
+{
+  "name": "ralph-runner",
+  "description": "Outer-loop orchestrator for Claude Code — run iterative, self-improving coding sessions with automatic progress tracking, verification, and cost reporting.",
+  "version": "0.1.0",
+  "author": {
+    "name": "ralph-runner contributors"
+  },
+  "homepage": "https://github.com/root/ralph-runner",
+  "repository": "https://github.com/root/ralph-runner",
+  "license": "MIT"
+}

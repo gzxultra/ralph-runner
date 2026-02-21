@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ralph-runner *)",
+      "Bash(ls ~/.ralph-runner/*)",
+      "Bash(cat ~/.ralph-runner/*)"
+    ]
+  }
+}
