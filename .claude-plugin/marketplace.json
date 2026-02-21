@@ -1,0 +1,41 @@
+{
+  "name": "ralph-runner",
+  "owner": {
+    "name": "gzxultra"
+  },
+  "metadata": {
+    "description": "Outer-loop orchestrator for Claude Code — iterative, self-improving coding sessions with progress tracking, verification, and cost reporting.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "ralph-runner",
+      "source": ".",
+      "description": "Outer-loop orchestrator for Claude Code — run iterative, self-improving coding sessions with automatic progress tracking, verification, and cost reporting.",
+      "version": "0.1.0",
+      "author": {
+        "name": "gzxultra"
+      },
+      "homepage": "https://github.com/gzxultra/ralph-runner",
+      "repository": "https://github.com/gzxultra/ralph-runner",
+      "license": "MIT",
+      "keywords": [
+        "orchestrator",
+        "outer-loop",
+        "iterative",
+        "automation",
+        "verification",
+        "cost-tracking",
+        "multi-session"
+      ],
+      "category": "development-workflows",
+      "tags": [
+        "claude-code",
+        "outer-loop",
+        "orchestration",
+        "testing",
+        "automation"
+      ]
+    }
+  ]
+}

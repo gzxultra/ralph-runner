@@ -1,18 +1,16 @@
 ---
 name: run
 description: Launch a ralph-runner outer-loop orchestration session. Use when a task requires multiple iterative Claude Code sessions to converge on a solution — large refactors, complex bug fixes, multi-file migrations, or any task that benefits from repeated attempts with progress tracking and verification.
+disable-model-invocation: true
 ---
 
 # Ralph Runner — Outer-Loop Orchestration
 
-Launch an iterative outer-loop run where ralph-runner spawns repeated Claude Code sessions, each building on the progress of the last.
+Launch an iterative outer-loop run where ralph-runner spawns repeated Claude Code sessions, each building on the progress of the last. Each iteration reads the accumulated progress file, continues the work, and updates the file before exiting. Between iterations, ralph-runner runs your verification command and tracks costs.
 
-## When to Use
+## Prerequisites
 
-- Tasks too large for a single Claude session
-- Work that benefits from iterative refinement (refactors, migrations, complex features)
-- Tasks with a clear verification command (tests, type checks, linters)
-- Overnight or background autonomous coding runs
+ralph-runner must be installed (`pip install ralph-runner` or `pip install -e .` from the repo root). The `ralph-runner` CLI must be available on your PATH.
 
 ## How to Launch
 
@@ -44,6 +42,11 @@ ralph-runner --prompt "$ARGUMENTS" --mode hitl --verify "make test"
 ralph-runner --prompt "$ARGUMENTS" --internet
 ```
 
+**Choose a model:**
+```bash
+ralph-runner --prompt "$ARGUMENTS" --model opus
+```
+
 ## Key Flags
 
 | Flag | Default | Purpose |
@@ -56,19 +59,27 @@ ralph-runner --prompt "$ARGUMENTS" --internet
 | `--timeout SECS` | 900 | Hard timeout per iteration |
 | `--idle-timeout SECS` | 120 | Idle timeout per iteration |
 | `--internet` | off | Enable web access |
+| `--plan / --no-plan` | on | Create a plan.md in the first iteration |
 | `--resume DIR` | none | Resume a previous run |
+| `--debug` | off | Save prompts and enable verbose logging |
 
 ## Output
 
 Runs are saved to `~/.ralph-runner/runs/<timestamp>/` with:
-- `progress.md` — cumulative progress across iterations
-- `plan.md` — task plan from first iteration
-- `stats.json` — costs, tokens, timing
-- `summary.md` — LLM-generated summary
+
+| File | Contents |
+|------|----------|
+| `progress.md` | Cumulative progress across all iterations |
+| `plan.md` | Task plan created in the first iteration |
+| `stats.json` | Per-iteration costs, tokens, timing, verify results |
+| `summary.md` | LLM-generated summary of accomplishments |
+| `iter-N.txt` | Claude's text output for iteration N |
+| `iter-N.jsonl` | Raw JSON stream for iteration N |
 
 ## Tips
 
-1. **Always use `--verify`** when possible — it prevents false completion signals
-2. **Start with `--mode hitl`** for unfamiliar tasks to review early iterations
-3. **Use `--resume`** if a run is interrupted — no work is lost
+1. **Always use `--verify`** when possible — it prevents false completion signals and tracks convergence
+2. **Start with `--mode hitl`** for unfamiliar tasks to review early iterations before going autonomous
+3. **Use `--resume`** if a run is interrupted — all progress is preserved in the progress file
 4. **Check `stats.json`** for cost tracking across long runs
+5. **Use `--debug`** to save the exact prompt sent to each iteration for troubleshooting

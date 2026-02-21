@@ -30,21 +30,11 @@ ralph-runner spawns repeated Claude Code sessions in a loop, feeding each one th
 └─────────────────────────────────────────────────┘
 ```
 
-Each iteration is a fresh Claude Code session that:
-
-1. Reads the progress file to understand what was done before
-2. Continues the work from where the last iteration left off
-3. Updates the progress file with what it accomplished
-4. Optionally signals completion when the task is done
-
-Between iterations, ralph-runner:
-
-- Runs your verification command (tests, linters, etc.)
-- Tracks token usage, costs, and timing per iteration
-- Detects timeouts and crashes, injecting error context into the next prompt
-- Enforces minimum iteration counts before accepting completion
+Each iteration is a fresh Claude Code session that reads the progress file, continues the work, and updates the file. Between iterations, ralph-runner runs your verification command, tracks token usage and costs, detects timeouts and crashes, and enforces minimum iteration counts before accepting completion.
 
 ## Installation
+
+### As a CLI tool
 
 ```bash
 pip install ralph-runner
@@ -58,12 +48,34 @@ cd ralph-runner
 pip install -e .
 ```
 
+### As a Claude Code plugin
+
+Install directly from the repo — no pip needed for plugin use:
+
+```bash
+# Add the marketplace
+/plugin marketplace add gzxultra/ralph-runner
+
+# Install the plugin
+/plugin install ralph-runner@ralph-runner
+```
+
+Or install from a local clone:
+
+```bash
+claude plugin add ./ralph-runner
+# or
+claude --plugin-dir ./ralph-runner
+```
+
 ### Prerequisites
 
 - **Python 3.11+**
 - **Claude Code CLI** (`claude`) installed and authenticated — see [Claude Code docs](https://docs.anthropic.com/en/docs/claude-code)
 
 ## Quick Start
+
+### From the command line
 
 ```bash
 # Basic run — 10 iterations on a task
@@ -76,6 +88,15 @@ ralph-runner --prompt "Fix the failing tests in src/api/" \
 # Shorter run with internet access
 ralph-runner --prompt "Add rate limiting to the API" \
   --iterations 5 --max-iterations 15 --internet
+```
+
+### From within Claude Code (plugin)
+
+```
+/ralph-runner:run Refactor the auth module to use JWT tokens
+/ralph-runner:run --verify "pytest" Fix the failing tests
+/ralph-runner:status
+/ralph-runner:resume
 ```
 
 ## Usage
@@ -140,7 +161,7 @@ ralph-runner --prompt "Clean up the codebase" \
   --verify "ruff check src/ && mypy src/ && pytest tests/"
 ```
 
-The verification trend is displayed as a sequence:
+The verification trend is displayed as a convergence sequence:
 
 ```
 ✓✓✗✓✓  (4/5 passed, converging)
@@ -181,39 +202,77 @@ ralph-runner shows a rich terminal display during execution:
 
 ## Claude Code Plugin
 
-ralph-runner also ships as a **Claude Code plugin**. This lets you invoke it directly from within Claude Code sessions.
+ralph-runner ships as a **Claude Code plugin**, so you can invoke it directly from within Claude Code sessions. The repository doubles as both a pip-installable Python package and a Claude Code plugin marketplace.
 
-### Install the plugin
+### Install from the marketplace
 
 ```bash
-# From a local clone
+# Add the marketplace (one-time)
+/plugin marketplace add gzxultra/ralph-runner
+
+# Install the plugin
+/plugin install ralph-runner@ralph-runner
+
+# Update to latest version
+/plugin marketplace update
+```
+
+### Install from local clone
+
+```bash
+# Option A: add as a plugin
 claude plugin add ./ralph-runner
 
-# Or point to the directory
+# Option B: load for a single session
 claude --plugin-dir ./ralph-runner
 ```
 
-### Use the skills
+### Available skills and commands
+
+| Command | Description |
+|---------|-------------|
+| `/ralph-runner:run <task>` | Launch an outer-loop orchestration session |
+| `/ralph-runner:status` | Check progress, costs, and results of runs |
+| `/ralph-runner:resume` | Resume an interrupted run |
+
+### Example plugin usage
 
 ```
-/ralph-runner:run Refactor the auth module to use JWT tokens
-/ralph-runner:run --verify "pytest" Fix the failing tests
+> /ralph-runner:run Fix all failing tests and get to 100% pass rate
+> /ralph-runner:run --verify "pytest" Refactor the database layer
+> /ralph-runner:status
+> /ralph-runner:resume
 ```
-
-See the `skills/` and `commands/` directories for the full plugin structure.
 
 ## Architecture
 
 ```
-src/ralph_runner/
-├── cli.py       # CLI entry point and main orchestration loop
-├── runner.py    # Core iteration engine — spawns and monitors Claude
-├── prompt.py    # Prompt construction with progress injection
-├── verify.py    # Verification command runner and trend tracking
-├── stats.py     # Stats, progress files, and summary generation
-├── display.py   # Terminal colors, spinners, formatting
-├── tools.py     # Tool-call description formatting
-└── models.py    # Data classes (IterationResult)
+ralph-runner/
+├── .claude-plugin/
+│   ├── plugin.json          # Plugin manifest (name, version, metadata)
+│   └── marketplace.json     # Marketplace catalog for distribution
+├── skills/
+│   ├── run/SKILL.md         # Skill: launch an orchestration session
+│   └── status/SKILL.md      # Skill: inspect run progress and costs
+├── commands/
+│   ├── run.md               # Slash command: /ralph-runner:run
+│   ├── status.md            # Slash command: /ralph-runner:status
+│   └── resume.md            # Slash command: /ralph-runner:resume
+├── settings.json            # Default permission grants
+├── src/ralph_runner/
+│   ├── cli.py               # CLI entry point and main orchestration loop
+│   ├── runner.py            # Core iteration engine — spawns and monitors Claude
+│   ├── prompt.py            # Prompt construction with progress injection
+│   ├── verify.py            # Verification command runner and trend tracking
+│   ├── stats.py             # Stats, progress files, and summary generation
+│   ├── display.py           # Terminal colors, spinners, formatting
+│   ├── tools.py             # Tool-call description formatting
+│   └── models.py            # Data classes (IterationResult)
+├── tests/
+│   └── test_basics.py       # Unit tests
+├── pyproject.toml            # Python package configuration
+├── LICENSE                   # MIT
+└── README.md
 ```
 
 ## License
